@@ -1,0 +1,1 @@
+move the pretrained Res2Net-50 weights into this folder
