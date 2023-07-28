@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-# from thop import profile
-# from thop import clever_format
+from thop import profile
+from thop import clever_format
 
 
 def clip_gradient(optimizer, grad_clip):
@@ -17,32 +17,10 @@ def clip_gradient(optimizer, grad_clip):
                 param.grad.data.clamp_(-grad_clip, grad_clip)
 
 
-def adjust_lr(optimizer, init_lr, epoch, decay_rate=0.1, decay_epoch=30):
-    decay = decay_rate ** (epoch // decay_epoch)
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = init_lr * decay
-
-
 def poly_lr(optimizer, init_lr, curr_iter, max_iter, power=0.9):
     lr = init_lr * (1 - float(curr_iter) / max_iter) ** power
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
-
-
-
-def warmup_poly(optimizer, init_lr, curr_iter, max_iter):
-    warm_start_lr = 1e-7
-    warm_steps = 1000
-
-    if curr_iter<= warm_steps:
-        warm_factor = (init_lr / warm_start_lr) ** (1 / warm_steps)
-        warm_lr = warm_start_lr * warm_factor ** curr_iter
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = warm_lr
-    else:
-        lr = init_lr * (1 - (curr_iter - warm_steps) / (max_iter - warm_steps)) ** 0.9
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = lr
 
 
 class AvgMeter(object):
@@ -66,3 +44,19 @@ class AvgMeter(object):
 
     def show(self):
         return torch.mean(torch.stack(self.losses[np.maximum(len(self.losses)-self.num, 0):]))
+
+
+def CalParams(model, input_tensor):
+    """
+    Usage:
+        Calculate Params and FLOPs via [THOP](https://github.com/Lyken17/pytorch-OpCounter)
+    Necessarity:
+        from thop import profile
+        from thop import clever_format
+    :param model:
+    :param input_tensor:
+    :return:
+    """
+    flops, params = profile(model, inputs=(input_tensor,))
+    flops, params = clever_format([flops, params], "%.3f")
+    print('[Statistics Information]\nFLOPs: {}\nParams: {}'.format(flops, params))
