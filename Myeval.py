@@ -1,14 +1,10 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
-
 import cv2
 from tqdm import tqdm
-
-# pip install pysodmetrics
 from py_sod_metrics import MAE, Emeasure, Fmeasure, Smeasure, WeightedFmeasure
 
-method='BGNet'
-for _data_name in ['CAMO','CHAMELEON','COD10K','NC4K']:
+method='C2FNet_3APFGM_RFBtest-40'
+for _data_name in ['CAMO','CHAMELEON','COD10K']:
     mask_root = './data/TestDataset/{}/GT'.format(_data_name)
     pred_root = './results/{}/{}/'.format(method, _data_name)
     mask_name_list = sorted(os.listdir(mask_root))
@@ -38,12 +34,12 @@ for _data_name in ['CAMO','CHAMELEON','COD10K','NC4K']:
         "Smeasure": sm,
         "wFmeasure": wfm,
         "MAE": mae,
-        "adpEm": em["adp"],
+        # "adpEm": em["adp"],
         "meanEm": em["curve"].mean(),
-        "maxEm": em["curve"].max(),
-        "adpFm": fm["adp"],
-        "meanFm": fm["curve"].mean(),
-        "maxFm": fm["curve"].max(),
+        # "maxEm": em["curve"].max(),
+        # "adpFm": fm["adp"],
+        # "meanFm": fm["curve"].mean(),
+        # "maxFm": fm["curve"].max(),
     }
 
     print(results)
